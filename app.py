@@ -1,4 +1,3 @@
-
 import streamlit as st
 import joblib
 import numpy as np
@@ -12,6 +11,7 @@ from nltk import pos_tag
 from textblob import TextBlob
 from sklearn.metrics.pairwise import cosine_similarity
 
+# Download required NLTK resources
 nltk.download('punkt', quiet=True)
 nltk.download('punkt_tab', quiet=True)
 nltk.download('stopwords', quiet=True)
@@ -23,40 +23,82 @@ nltk.download('averaged_perceptron_tagger_eng', quiet=True)
 st.set_page_config(page_title="NLP Sentiment Chatbot", page_icon="💬",
                    layout="centered", initial_sidebar_state="expanded")
 
+# Injecting Custom Glassmorphism CSS
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-.main { background-color: #0f1117; }
-.header-gradient {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    padding: 30px; border-radius: 16px; margin-bottom: 24px;
-    border: 1px solid rgba(255,255,255,0.06);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Main Background and Font */
+[data-testid="stAppViewContainer"] {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
 }
-.header-gradient h1 {
+
+/* Glassmorphism Header */
+.header-glass {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 32px; 
+    border-radius: 20px; 
+    margin-bottom: 24px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+.header-glass h1 {
     background: linear-gradient(90deg, #a78bfa, #60a5fa, #34d399);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    font-family: 'Inter', sans-serif; font-weight: 700; font-size: 2em;
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent;
+    font-weight: 700; 
+    font-size: 2.2em;
     margin: 0 0 8px 0;
 }
-.header-gradient p { color: #94a3b8; font-size: 1em; margin: 0; }
-.header-gradient .author {
-    color: #60a5fa; font-size: 0.95em; font-weight: 600; margin-top: 10px;
+
+.header-glass p { color: #94a3b8; font-size: 1.05em; margin: 0; font-weight: 300; }
+
+.header-glass .author {
+    color: #e2e8f0; font-size: 0.95em; font-weight: 500; margin-top: 12px;
 }
+
+/* Glass Tags */
 .tag {
-    display: inline-block; background: rgba(139,92,246,0.12); color: #a78bfa;
-    padding: 4px 12px; border-radius: 20px; font-size: 0.78em; margin: 3px 4px;
-    border: 1px solid rgba(139,92,246,0.2); font-family: 'Inter', sans-serif;
+    display: inline-block; 
+    background: rgba(139, 92, 246, 0.15); 
+    color: #c084fc;
+    padding: 6px 14px; 
+    border-radius: 20px; 
+    font-size: 0.8em; 
+    margin: 4px 4px 0 0;
+    border: 1px solid rgba(139, 92, 246, 0.25); 
+    backdrop-filter: blur(4px);
+    font-weight: 500;
 }
+
+/* Glassmorphism Analysis Card */
 .analysis-card {
-    background: #1e1e2e; border-radius: 12px; padding: 16px 20px;
-    margin: 8px 0 16px 0; border: 1px solid rgba(255,255,255,0.06);
-    font-family: 'Inter', monospace; font-size: 0.85em; color: #cbd5e1; line-height: 1.6;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 16px; 
+    padding: 18px 24px;
+    margin: 10px 0 20px 0; 
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    font-family: 'Inter', monospace; 
+    font-size: 0.85em; 
+    color: #cbd5e1; 
+    line-height: 1.7;
 }
-.analysis-card .label { color: #a78bfa; font-weight: 600; }
-.pos-tag { color: #34d399; }
-.neg-tag { color: #f87171; }
-.neu-tag { color: #fbbf24; }
+
+.analysis-card .label { color: #818cf8; font-weight: 600; }
+.pos-tag { color: #34d399; font-weight: 600; }
+.neg-tag { color: #f87171; font-weight: 600; }
+.neu-tag { color: #fbbf24; font-weight: 600; }
+
+/* Customizing Chat Input */
+.stChatInput { border-radius: 12px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -207,12 +249,13 @@ if "mood_scores" not in st.session_state:
 if "analyses" not in st.session_state:
     st.session_state.analyses = []
 
+# Updated Glassmorphism Header
 st.markdown("""
-<div class="header-gradient">
+<div class="header-glass">
     <h1>NLP Sentiment Chatbot</h1>
     <p>Trained on 1.6 million tweets — powered by ML ensemble and NLP</p>
-    <p class="author">Akshat Garg &nbsp;|&nbsp; 23BCE10641</p>
-    <div style="margin-top:12px;">
+    <p class="author">Aritra Pradhan &nbsp;|&nbsp; 23BCE11127</p>
+    <div style="margin-top:16px;">
         <span class="tag">Voting Ensemble</span>
         <span class="tag">LogReg + SVM + NB</span>
         <span class="tag">TF-IDF Trigrams</span>
@@ -224,13 +267,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 with st.sidebar:
-    st.markdown("### Akshat Garg")
-    st.markdown("**Reg No:** 23BCE10641")
+    st.markdown("### Aritra Pradhan")
+    st.markdown("**Reg No:** 23BCE11127")
     st.divider()
     st.markdown("### Models")
     st.markdown("""
     - **Sentiment**: Ensemble (LogReg + SVM + NB) + TF-IDF trigrams (100K tweets)
-    - **Negation**: Contraction expansion + NOT\_ prefix
+    - **Negation**: Contraction expansion + NOT_ prefix
     - **Intent**: Naive Bayes (6 classes)
     - **Conversation**: TF-IDF cosine similarity
     - **NLP**: POS tagging, TextBlob, keyword extraction
