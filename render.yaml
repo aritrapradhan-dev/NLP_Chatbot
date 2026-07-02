@@ -1,0 +1,10 @@
+
+# A `render.yaml` blueprint to deploy your Streamlit app
+services:
+  - type: web
+    name: nlp-sentiment-chatbot
+    env: python
+    buildCommand: "pip install --no-cache-dir -r requirements.txt"
+    startCommand: "streamlit run app.py --server.port $PORT --server.enableCORS false --server.enableXsrfProtection false"
+    healthCheckPath: "/"
+    autoDeploy: true
